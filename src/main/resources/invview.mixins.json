@@ -6,6 +6,7 @@
   "mixins": [
     "EntityAccessor"
   ],
+
   "injectors": {
     "defaultRequire": 1
   }
