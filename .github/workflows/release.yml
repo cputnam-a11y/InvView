@@ -23,18 +23,8 @@ jobs:
       - name: Build artifacts
         run: ./gradlew clean build
 
-      - name: Upload assets to GitHub, Modrinth and CurseForge
-        uses: Kir-Antipov/mc-publish@v3.3
+      - name: Upload assets to GitHub
+        uses: actions/upload-artifact@v4
         with:
-          modrinth-id: jrDKjZP7
-          modrinth-featured: false
-          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
-          
-          curseforge-id: 405159
-          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
-          
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          
-          loaders: |
-            fabric
-            quilt
+          name: Artifacts
+          path: build/libs/

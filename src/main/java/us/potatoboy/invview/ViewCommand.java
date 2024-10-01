@@ -10,7 +10,7 @@ import dev.emi.trinkets.api.TrinketsApi;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import eu.pb4.sgui.api.gui.SimpleGui;
 import io.github.apace100.apoli.component.PowerHolderComponent;
-import io.github.apace100.apoli.power.InventoryPower;
+import io.github.apace100.apoli.power.type.InventoryPowerType;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.command.argument.GameProfileArgumentType;
 import net.minecraft.inventory.EnderChestInventory;
@@ -18,6 +18,8 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.packet.c2s.common.SyncedClientOptions;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.server.MinecraftServer;
@@ -25,6 +27,7 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.minecraft.world.dimension.DimensionType;
 import us.potatoboy.invview.gui.SavingPlayerDataGui;
 import us.potatoboy.invview.gui.UnmodifiableSlot;
@@ -139,8 +142,8 @@ public class ViewCommand {
             if (isProtected) {
                 context.getSource().sendError(Text.literal(msgProtected));
             } else {
-                List<InventoryPower> inventories = PowerHolderComponent.getPowers(requestedPlayer,
-                        InventoryPower.class);
+                List<InventoryPowerType> inventories = PowerHolderComponent.getPowerTypes(requestedPlayer,
+                        InventoryPowerType.class);
                 if (inventories.isEmpty()) {
                     context.getSource().sendError(Text.literal("Requested player has no inventory power"));
                 } else {
@@ -148,7 +151,7 @@ public class ViewCommand {
                     gui.setTitle(requestedPlayer.getName());
                     addBackground(gui);
                     int index = 0;
-                    for (InventoryPower inventory : inventories) {
+                    for (InventoryPowerType inventory : inventories) {
                         for (int i = 0; i < inventory.size(); i++) {
                             gui.setSlotRedirect(index, canModify ? new Slot(inventory, i, 0, 0) : new UnmodifiableSlot(inventory, i));
                             index += 1;
@@ -175,9 +178,8 @@ public class ViewCommand {
                 NbtCompound compound = compoundOpt.get();
                 if (compound.contains("Dimension")) {
                     ServerWorld world = minecraftServer.getWorld(
-                            DimensionType.worldFromDimensionNbt(new Dynamic<>(NbtOps.INSTANCE, compound.get("Dimension")))
-                                    .result().get());
-
+                            RegistryKey.of(RegistryKeys.WORLD, Identifier.of(compound.getString("Dimension")))
+                    );
                     if (world != null) {
                         ((EntityAccessor) requestedPlayer).callSetWorld(world);
                     }
